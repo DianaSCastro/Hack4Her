@@ -5,7 +5,7 @@
 
 ## Arquitectura de Ramas
 
-* 🛡️ **`main`**: La rama sagrada. Aquí solo vive el código final, estable y 100% funcional. De aquí se presentará el proyecto a los jueces.
+* 🛡️ **`main`**: La rama sagrada. Aquí solo vive el código final, estable y 100% funcional. De aquí se presentará el proyecto a los jueces. NADIE TOCA MAIN
 * 🤝 **`develop`**: Nuestro punto de encuentro. Aquí iremos fusionando el trabajo de las 4 para integrar el sistema.
 * 💻 **`dev-[tu-nombre]`**: Tu espacio seguro basicamente. Aquí creas tus archivos, rompes el código, pruebas librerías y avanzas en tus módulos sin miedo a afectar a las demás.
 
