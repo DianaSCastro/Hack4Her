@@ -35,6 +35,17 @@ git commit -m "Estructura inicial del procesamiento de datos"
 git status  
 git push origin dev-[tu-nombre]
 
+## Flujo al instalar algo localmente 
+
+Instalas algo nuevo: pip install [libreria]
+
+Actualizas el archivo: pip freeze > requirements.txt
+
+Guardas en Git:
+
+git add requirements.txt  
+git commit -m "chore: agrega [libreria] a los requerimientos"  
+git push origin dev-diana  
 
 ## ¿Cómo hacer un Pull Request (PR) correcto?
 
