@@ -32,7 +32,7 @@ git commit -m "Estructura inicial del procesamiento de datos"
 
 ### 3. Sube tus cambios a GitHub
 
-git status
+git status  
 git push origin dev-[tu-nombre]
 
 
