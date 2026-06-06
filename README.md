@@ -11,9 +11,12 @@
 
 ---
 
-## Flujo de Trabajo (Día a Día)
+## Flujo de Trabajo
 
 Cada vez que vayas a programar una nueva función o script, sigue estos pasos:
+
+### 0. Clona el repositorio
+https://github.com/DianaSCastro/Hack4Her.git
 
 ### 1. Mantén tu rama actualizada
 Antes de empezar a escribir, asegúrate de traer lo que tus compañeras ya fusionaron en `develop` para evitar conflictos:
