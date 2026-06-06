@@ -16,22 +16,23 @@
 Cada vez que vayas a programar una nueva función o script, sigue estos pasos:
 
 ### 0. Clona el repositorio
-https://github.com/DianaSCastro/Hack4Her.git
+git clone https://github.com/DianaSCastro/Hack4Her.git
 
 ### 1. Mantén tu rama actualizada
 Antes de empezar a escribir, asegúrate de traer lo que tus compañeras ya fusionaron en `develop` para evitar conflictos:
 
-git checkout dev-[tu-nombre]
-git merge develop
+git checkout dev-[tu-nombre]  
+git merge develop  
 
 ### 2. Programa y guarda tus cambios de forma local
 Haz commits pequeños y seguidos con mensajes claros:
 
-git add .
+git add .  
 git commit -m "Estructura inicial del procesamiento de datos"
 
 ### 3. Sube tus cambios a GitHub
 
+git status
 git push origin dev-[tu-nombre]
 
 
