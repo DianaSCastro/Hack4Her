@@ -193,6 +193,7 @@
   // ── LLENAR FORMULARIO (via Playwright + backend) ──────────
 
   function llenarFormulario() {
+    analizar(); // Primero analizamos para asegurar que tenemos datos frescos
     setStatus("VERIFICANDO DATOS", "thinking");
 
     // Verificar que haya productos capturados en el background
@@ -252,6 +253,7 @@
 
   function clearLogs() {
     document.getElementById("ot-logs").innerHTML = "";
+    setStatus("EN ESPERA", "thinking");
   }
 
   function agentLog(msg, type = "info") {
