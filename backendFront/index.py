@@ -4,10 +4,12 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import anthropic
 from dotenv import load_dotenv
+import os, json
+from datetime import datetime
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
-ANTHROPIC_API_KEY = "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"
+ANTHROPIC_API_KEY = "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"
 CATALOGO_PATH     = os.path.join(os.path.dirname(__file__), "data", "Catalogo_SKUS.csv")
 
 app = Flask(__name__)
@@ -59,6 +61,16 @@ Sin markdown, solo JSON."""
         result = json.loads(raw)
     except Exception as e:
         result = {"error": str(e), "raw": locals().get("raw", "")}
+    
+    carpeta = os.path.join(os.path.dirname(__file__), "tmp_capturas")
+    os.makedirs(carpeta, exist_ok=True)
+    nombre = f"captura_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    ruta = os.path.join(carpeta, nombre)
+    with open(ruta, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    print(f"💾 Guardado: {ruta}")
+
+    
 
     return jsonify(result)
 
