@@ -15,51 +15,49 @@ load_dotenv()
 
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-PROMPT_EXTRACCION = """Analiza el siguiente texto extraído de una página web de comercio (puede ser Walmart, Soriana, Sam's Club, o cualquier otra tienda).
+PROMPT_EXTRACCION = """Analiza el siguiente texto extraído de una página web de comercio (puede ser un carrito, orden, pedido o listado de productos).
 
-Tu tarea: identificar TODOS los productos y sus cantidades.
+Tu tarea es extraer TODOS los productos con sus cantidades.
 
-REGLAS:
-- Extrae cualquier cosa que parezca un producto (alimento, bebida, artículo)
-- La cantidad puede aparecer como: "2 pzas", "qty: 3", "x4", "cantidad: 2", "12 unidades", etc.
-- Si no hay cantidad visible, usa 1 como default
-- No importa el formato de la página ni cómo se llamen los campos
-- Si no hay productos claros en el texto, retorna lista vacía
+Busca patrones como:
+- Nombre de producto seguido de precio o cantidad
+- "X artículos" o "cantidad: X"
+- Números junto a nombres de productos
+- Listas de items en carritos de compra
 
-TEXTO DE LA PÁGINA:
+Si no ves cantidad explícita, asume 1.
+
+Texto de la página:
 {texto}
 
-Responde ÚNICAMENTE con JSON válido, sin texto adicional:
-{{
-  "productos": [
-    {{"nombre": "nombre completo del producto", "cantidad": número}},
-    ...
-  ]
-}}"""
+Responde ÚNICAMENTE con este JSON válido, sin texto adicional:
+{{"productos": [{{"nombre": "nombre del producto", "cantidad": número}}]}}
+
+Si no encuentras productos, responde: {{"productos": []}}"""
 
 
-def extraer_productos(texto_pagina: str) -> list[dict]:
-    """
-    Manda el texto de la página a Claude y retorna lista de productos con cantidades.
-    """
-    # Limitar texto para no exceder tokens (máx ~8000 caracteres)
+def extraer_productos(texto_pagina):
     texto_recortado = texto_pagina[:8000]
-
     mensaje = client.messages.create(
-        model="claude-opus-4-5",
-        max_tokens=1024,
-        messages=[{
-            "role": "user",
-            "content": PROMPT_EXTRACCION.format(texto=texto_recortado)
-        }]
+        model="claude-opus-4-5", max_tokens=1024,
+        messages=[{"role": "user", "content": PROMPT_EXTRACCION.format(texto=texto_recortado)}]
     )
-
-    respuesta = mensaje.content[0].text
-
-    # Extraer JSON de la respuesta
-    match = re.search(r'\{.*\}', respuesta, re.DOTALL)
-    if not match:
+    raw = mensaje.content[0].text
+    # Intentar extraer JSON de la respuesta
+    try:
+        match = re.search(r'\{.*\}', raw, re.DOTALL)
+        if not match:
+            return []
+        # Limpiar caracteres problemáticos
+        json_str = match.group()
+        json_str = re.sub(r'[\x00-\x1f\x7f]', ' ', json_str)
+        return json.loads(json_str).get("productos", [])
+    except json.JSONDecodeError:
+        # Intentar extraer solo el array de productos
+        try:
+            arr = re.search(r'\[.*\]', raw, re.DOTALL)
+            if arr:
+                return json.loads(arr.group())
+        except Exception:
+            pass
         return []
-
-    data = json.loads(match.group())
-    return data.get("productos", [])
