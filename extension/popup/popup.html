@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Always on Shelf</title>
+  <link rel="stylesheet" href="popup.css"/>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-brand">
+      <div class="dot"></div>
+      <span class="brand">Always on Shelf</span>
+    </div>
+    <div class="sub">Arca Continental · Hackathon</div>
+  </div>
+
+  <div class="status">
+    <span class="status-dot" id="sdot"></span>
+    <span id="slabel">Inactivo</span>
+    <span class="backend" id="bping">backend…</span>
+  </div>
+
+  <div class="btns">
+    <button class="pbtn observe"  id="b-observe">👁  Modo Observar</button>
+    <button class="pbtn automate" id="b-auto">⚡  Automatizar</button>
+    <button class="pbtn reset"    id="b-reset">🔄  Resetear sesión</button>
+  </div>
+
+  <div class="map-section">
+    <div class="map-title">Mapeo aprendido</div>
+    <div id="map-entries"><span class="empty">Sin datos — usa Modo Observar primero.</span></div>
+  </div>
+
+  <div class="footer">
+    <button class="link-btn" id="open-panel">Abrir panel en la página →</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
