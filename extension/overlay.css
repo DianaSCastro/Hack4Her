@@ -9,21 +9,18 @@
   position: fixed;
   bottom: 28px; right: 28px;
   z-index: 2147483647;
-  width: 64px; height: 64px;
+  width: 54px; height: 54px;
   cursor: pointer;
   user-select: none;
-  border-radius: 50%;
-  overflow: visible;
 }
 
-#ot-fab .ot-fab-ring {
+.ot-fab-ring {
   position: absolute;
   inset: -5px;
   border-radius: 50%;
-  background: conic-gradient(from 0deg, #c8102e, #ff6b6b, #c8102e, transparent 65%);
-  animation: ot-spin 3s linear infinite;
-  opacity: 0.85;
-  z-index: 0;
+  background: conic-gradient(from 0deg, #c8102e, #ff6b6b, #c8102e, transparent 70%);
+  animation: ot-spin 2.5s linear infinite;
+  opacity: 0.8;
 }
 
 #ot-fab #ot-fab-video {

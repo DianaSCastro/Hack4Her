@@ -38,11 +38,7 @@
     <div class="ot-header">
       <div class="ot-brand">
         <div class="ot-brand-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <circle cx="11" cy="11" r="8" stroke="white" stroke-width="1.8"/>
-            <path d="M21 21l-4.35-4.35" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M11 8v3l2 2" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
+          <img src="${EXT}icons/LogoBlanco.jpg" style="width:30px;height:30px;object-fit:contain;border-radius:4px;" alt="O-Trace"/>
         </div>
         <div>
           <div class="ot-name">O-Trace AI</div>
@@ -61,7 +57,7 @@
     <!-- URL CONTEXT -->
     <div class="ot-context">
       <div class="ot-context-label">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
           <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" stroke-width="1.8"/>
         </svg>
@@ -94,7 +90,7 @@
     <!-- LOG HEADER -->
     <div class="ot-log-header">
       <div class="ot-log-title-txt">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
           <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         Actividad del agente
