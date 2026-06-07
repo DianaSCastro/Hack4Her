@@ -1,147 +1,270 @@
 // ============================================================
-//  Always on Shelf — Content Script
-//  Agarra TODO el DOM, lo convierte a JSON y lo loguea
-//  en consola + manda al backend via background.js
+//  O-Trace — Content Script
+//  Agente de IA para lectura y automatización de portales web
 // ============================================================
 
 (function () {
-  if (window.__AOS__) return;
-  window.__AOS__ = true;
+  if (window.__OTRACE__) return;
+  window.__OTRACE__ = true;
 
-  // ── Botón flotante ────────────────────────────────────────
+  const EXT = chrome.runtime.getURL("");
+
+  // ── FAB animado ───────────────────────────────────────────
 
   const fab = document.createElement("div");
-  fab.id = "aos-fab";
-  fab.title = "Always on Shelf";
-  fab.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="white" stroke-width="1.8" stroke-linejoin="round"/>
-    <path d="M2 17l10 5 10-5" stroke="white" stroke-width="1.8" stroke-linejoin="round"/>
-    <path d="M2 12l10 5 10-5" stroke="white" stroke-width="1.8" stroke-linejoin="round"/>
-  </svg>`;
+  fab.id = "ot-fab";
+  fab.title = "O-Trace Agente";
+  fab.innerHTML = `
+    <div class="ot-fab-ring"></div>
+    <video
+      id="ot-fab-video"
+      src="${EXT}icons/Logoanimado.mp4"
+      autoplay
+      loop
+      muted
+      playsinline
+    ></video>
+  `;
   document.body.appendChild(fab);
-  fab.addEventListener("click", () => panel.classList.toggle("aos-open"));
+  fab.addEventListener("click", () => panel.classList.toggle("ot-open"));
 
-  // ── Panel lateral ─────────────────────────────────────────
+  // ── Panel ─────────────────────────────────────────────────
 
   const panel = document.createElement("div");
-  panel.id = "aos-panel";
+  panel.id = "ot-panel";
   panel.innerHTML = `
-    <div class="aos-header">
-      <div class="aos-header-left">
-        <div class="aos-logo-mark"></div>
-        <span class="aos-title">Always on Shelf</span>
+
+    <!-- HEADER -->
+    <div class="ot-header">
+      <div class="ot-brand">
+        <div class="ot-brand-icon">
+          <img src="${EXT}icons/LogoBlanco.jpg" style="width:30px;height:30px;object-fit:contain;border-radius:4px;" alt="O-Trace"/>
+        </div>
+        <div>
+          <div class="ot-name">O-Trace AI</div>
+          <div class="ot-sub"></div>
+        </div>
       </div>
-      <button class="aos-x" id="aos-close">✕</button>
+      <button class="ot-close" id="ot-close">✕</button>
     </div>
-    <div class="aos-badge" id="aos-badge">LISTO</div>
-    <div class="aos-block">
-      <div class="aos-url" id="aos-url"></div>
-      <button class="aos-btn aos-capture" id="aos-capture">
-        <span>📋</span> Capturar página → Consola + Backend
-      </button>
-      <button class="aos-btn aos-fill" id="aos-fill">
-        <span>📋</span> Llenar formulario
-      </button>
-      <button class="aos-btn aos-reset" id="aos-reset">
-        <span>🔄</span> Limpiar log
-      </button>
+
+    <!-- STATUS -->
+    <div class="ot-status" id="ot-status">
+      <span class="ot-dot" id="ot-dot"></span>
+      <span id="ot-status-text">EN ESPERA</span>
     </div>
-    <div class="aos-block">
-      <div class="aos-label">Log</div>
-      <div id="aos-log"></div>
+
+    <!-- URL CONTEXT -->
+    <div class="ot-context">
+      <div class="ot-context-label">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" stroke-width="1.8"/>
+        </svg>
+        Fuente activa
+      </div>
+      <div class="ot-context-url" id="ot-url">—</div>
     </div>
+
+    <!-- BOTONES -->
+    <div class="ot-buttons">
+
+      <button class="ot-btn ot-btn-analizar" id="ot-analizar">
+        <img id="ot-img-analizar" class="ot-btn-img" src="" alt=""/>
+        <div class="ot-btn-text">
+          <span class="ot-btn-label">ANALIZAR PÁGINA</span>
+          <span class="ot-btn-desc">Extrae datos y mapea con catálogo</span>
+        </div>
+      </button>
+
+      <button class="ot-btn ot-btn-auto" id="ot-auto">
+        <img id="ot-img-auto" class="ot-btn-img" src="" alt=""/>
+        <div class="ot-btn-text">
+          <span class="ot-btn-label">LLENAR FORMULARIO</span>
+          <span class="ot-btn-desc">Automatiza el llenado con Playwright</span>
+        </div>
+      </button>
+
+    </div>
+
+    <!-- LOG HEADER -->
+    <div class="ot-log-header">
+      <div class="ot-log-title-txt">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Actividad del agente
+      </div>
+      <button class="ot-clear-btn" id="ot-clear">LIMPIAR</button>
+    </div>
+
+    <!-- LOGS -->
+    <div class="ot-logs" id="ot-logs">
+      <div class="ot-log-empty">El agente está listo. Presiona Analizar para comenzar.</div>
+    </div>
+
   `;
   document.body.appendChild(panel);
-  document.getElementById("aos-url").textContent = window.location.hostname;
+
+  // Setear URL y logos
+  document.getElementById("ot-url").textContent = window.location.href.slice(0, 60) + (window.location.href.length > 60 ? "…" : "");
+  document.getElementById("ot-img-analizar").src = EXT + "icons/Analisisoff.png";
+  document.getElementById("ot-img-auto").src     = EXT + "icons/Autooff.png";
 
   // ── Eventos ───────────────────────────────────────────────
 
-  document.getElementById("aos-close").onclick  = () => panel.classList.remove("aos-open");
-  document.getElementById("aos-capture").onclick = capturarYEnviar;
-  document.getElementById("aos-fill").onclick = llenarFormulario;
-  document.getElementById("aos-reset").onclick   = () => {
-    document.getElementById("aos-log").innerHTML = "";
-  };
+  document.getElementById("ot-close").onclick    = () => panel.classList.remove("ot-open");
+  document.getElementById("ot-clear").onclick    = clearLogs;
+  document.getElementById("ot-analizar").onclick = () => analizar();
+  document.getElementById("ot-auto").onclick     = () => llenarFormulario();
 
-  // ── NÚCLEO ────────────────────────────────────────────────
+  // Hover: cambiar imagen botón analizar
+  const btnA = document.getElementById("ot-analizar");
+  const imgA = document.getElementById("ot-img-analizar");
+  btnA.addEventListener("mouseenter", () => imgA.src = EXT + "icons/Analisison.png");
+  btnA.addEventListener("mouseleave", () => imgA.src = EXT + "icons/Analisisoff.png");
+
+  const btnAu = document.getElementById("ot-auto");
+  const imgAu = document.getElementById("ot-img-auto");
+  btnAu.addEventListener("mouseenter", () => imgAu.src = EXT + "icons/Autoon.png");
+  btnAu.addEventListener("mouseleave", () => imgAu.src = EXT + "icons/Autooff.png");
+
+  // ── ANALIZAR PÁGINA (antes capturarYEnviar) ───────────────
+
+  function analizar() {
+    setStatus("INICIALIZANDO", "thinking");
+    clearLogs();
+
+    agentLog("O-Trace inicializando análisis de contexto web...", "think");
+    agentLog("Escaneando estructura del DOM...", "info");
+
+    setTimeout(() => {
+      const payload = {
+        ...extraerTodo(),
+        texto: document.body.innerText.slice(0, 8000)
+      };
+
+      agentLog(`Arquitectura detectada: ${document.querySelectorAll("*").length} nodos`, "info");
+      agentLog(`Productos identificados: ${payload.productos.length}`, "data");
+      agentLog(`Formularios encontrados: ${payload.formularios.length}`, "data");
+      agentLog(`Tablas estructuradas: ${payload.tablas.length}`, "data");
+      agentLog(`Hipervínculos mapeados: ${payload.links.length}`, "data");
+
+      setStatus("PROCESANDO CON AGENTE", "processing");
+      agentLog("Serializando payload para modelo semántico...", "think");
+      agentLog("Enviando contexto a backend Claude Sonnet...", "info");
+
+      console.group("🔍 [O-Trace] Captura completa");
+      console.log("URL:", payload.meta.url);
+      console.log("Título:", payload.meta.titulo);
+      console.log("Productos encontrados:", payload.productos.length);
+      console.log("Formularios encontrados:", payload.formularios.length);
+      console.log("Tablas encontradas:", payload.tablas.length);
+      console.log("--- PAYLOAD COMPLETO ---");
+      console.log(JSON.stringify(payload, null, 2));
+      console.groupEnd();
+
+      chrome.runtime.sendMessage({ type: "FETCH_MAPEAR", payload }, (res) => {
+        if (chrome.runtime.lastError) {
+          agentLog(`Error de conexión: ${chrome.runtime.lastError.message}`, "error");
+          setStatus("ERROR", "error");
+          return;
+        }
+        if (res?.ok) {
+          const d = res.data;
+          agentLog("Respuesta recibida del modelo", "success");
+          agentLog(`Productos mapeados: ${d.total_mapeados ?? d.productos?.length ?? 0}`, "success");
+          if (d.productos?.length) {
+            d.productos.forEach(p => {
+              agentLog(`   └ ${p.nombre_sku_solicitado} → SKU ${p.sku_solicitado}`, "data");
+            });
+          }
+          if (d.resumen) agentLog(`💬 ${d.resumen}`, "think");
+          setStatus("ANÁLISIS COMPLETO", "done");
+          console.log("🤖 [O-Trace] Claude:", d);
+        } else {
+          agentLog(`Backend: ${res?.error}`, "error");
+          setStatus("ERROR", "error");
+        }
+      });
+    }, 300);
+  }
+
+  // ── LLENAR FORMULARIO (via Playwright + backend) ──────────
 
   function llenarFormulario() {
-    // Primero verificar que haya productos capturados en el background
+    setStatus("VERIFICANDO DATOS", "thinking");
+
+    // Verificar que haya productos capturados en el background
     chrome.runtime.sendMessage({ type: "GET_STATE" }, (res) => {
       if (chrome.runtime.lastError) {
-        log(`❌ ${chrome.runtime.lastError.message}`);
+        agentLog(`Error de conexión: ${chrome.runtime.lastError.message}`, "error");
+        setStatus("ERROR", "error");
         return;
       }
 
       const productos = res?.state?.productos || [];
 
       if (!productos.length) {
-        log("⚠️ No hay productos capturados. Usa 'Capturar página' primero.");
+        agentLog("No hay productos capturados. Usa 'Analizar Página' primero.", "warn");
+        setStatus("EN ESPERA", "thinking");
         return;
       }
 
-      log(`🤖 Enviando ${productos.length} producto(s) al automatizador...`);
+      agentLog(`${productos.length} producto(s) listos para automatizar`, "success");
+      agentLog("Iniciando Playwright en el sistema destino...", "info");
+      setStatus("AUTOMATIZANDO", "processing");
 
       chrome.runtime.sendMessage({ type: "RUN_AUTOMATION" }, (resp) => {
         if (chrome.runtime.lastError) {
-          log(`❌ ${chrome.runtime.lastError.message}`);
+          agentLog(`Error de conexión: ${chrome.runtime.lastError.message}`, "error");
+          setStatus("ERROR", "error");
           return;
         }
         if (resp?.ok) {
           const r = resp.result;
-          log(`✅ Formulario llenado: ${r.exitosos}/${r.total} exitosos`);
+          agentLog(`Formulario llenado: ${r.exitosos}/${r.total} registros exitosos`, "success");
           if (r.fallidos > 0) {
-            log(`⚠️ ${r.fallidos} fallo(s) — ver consola para detalles`);
-            console.warn("[AoS] Detalle de fallos:", r.detalle.filter(d => !d.coincide));
+            agentLog(`${r.fallidos} fallo(s) detectados — ver consola para detalles`, "warn");
+            r.detalle.filter(d => !d.coincide).forEach(d => {
+              agentLog(`   └ ❌ ${d.producto}: ${d.error || "no coincide"}`, "error");
+            });
+            console.warn("[O-Trace] Detalle de fallos:", r.detalle.filter(d => !d.coincide));
           }
-          console.log("[AoS] Resultado automatizador:", r);
+          setStatus("AUTOMATIZACIÓN COMPLETA", "done");
+          console.log("[O-Trace] Resultado automatizador:", r);
         } else {
-          log(`❌ Error al automatizar: ${resp?.error}`);
+          agentLog(`Error al automatizar: ${resp?.error}`, "error");
+          setStatus("ERROR", "error");
         }
       });
     });
-  };
-
-  function capturarYEnviar() {
-    log("⏳ Extrayendo DOM completo...");
-
-    const payload = {
-  ...extraerTodo(),
-  texto: document.body.innerText.slice(0, 8000)
-};
-
-    // ✅ LOG COMPLETO EN CONSOLA DEL NAVEGADOR
-    console.group("🛒 [AoS] Captura de página");
-    console.log("URL:", payload.meta.url);
-    console.log("Título:", payload.meta.titulo);
-    console.log("Productos encontrados:", payload.productos.length);
-    console.log("Formularios encontrados:", payload.formularios.length);
-    console.log("Tablas encontradas:", payload.tablas.length);
-    console.log("Textos encontrados:", payload.textos.length);
-    console.log("Listas encontradas:", payload.listas.length);
-    console.log("Links encontrados:", payload.links.length);
-    console.log("--- PAYLOAD COMPLETO ---");
-    console.log(JSON.stringify(payload, null, 2));
-    console.groupEnd();
-
-    log(`📦 ${payload.productos.length} productos | ${payload.formularios.length} forms | ${payload.tablas.length} tablas`);
-    log("📡 Enviando al backend...");
-
-    chrome.runtime.sendMessage({ type: "FETCH_MAPEAR", payload }, (res) => {
-      if (chrome.runtime.lastError) {
-        log(`❌ ${chrome.runtime.lastError.message}`);
-        return;
-      }
-      if (res?.ok) {
-        console.log("🤖 [AoS] Respuesta de Claude:", res.data);
-        log("✅ Claude respondió — ver consola");
-      } else {
-        log(`❌ Error backend: ${res?.error}`);
-      }
-    });
   }
 
-  // ── Extractor completo del DOM ────────────────────────────
+  // ── Helpers de UI ─────────────────────────────────────────
+
+  function setStatus(text, type) {
+    const dot   = document.getElementById("ot-dot");
+    const label = document.getElementById("ot-status-text");
+    label.textContent = text;
+    dot.className = "ot-dot ot-dot-" + type;
+  }
+
+  function clearLogs() {
+    document.getElementById("ot-logs").innerHTML = "";
+  }
+
+  function agentLog(msg, type = "info") {
+    const container = document.getElementById("ot-logs");
+    const row = document.createElement("div");
+    row.className = `ot-log ot-log-${type}`;
+    const time = new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    row.innerHTML = `<span class="ot-log-time">${time}</span><span class="ot-log-msg">${msg}</span>`;
+    container.appendChild(row);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // ── Extractores ───────────────────────────────────────────
 
   function extraerTodo() {
     return {
@@ -173,10 +296,7 @@
   }
 
   function extraerProductos() {
-    const productos = [];
-    const vistos = new Set();
-
-    // Selectores retail MX
+    const productos = [], vistos = new Set();
     const sels = [
       '[data-testid="product-title"]', '[data-testid="allotment-product-tile"]',
       '[class*="product-title"]', '[class*="ProductTitle"]',
@@ -187,7 +307,6 @@
       'article[class*="product"]', '[data-product]',
       '[itemprop="product"]', '[itemtype*="Product"]'
     ];
-
     sels.forEach(sel => {
       try {
         document.querySelectorAll(sel).forEach(el => {
@@ -195,48 +314,40 @@
           vistos.add(el);
           const texto = el.innerText?.trim() || "";
           if (!texto || texto.length < 5) return;
-
           const precioMatch = texto.match(/\$[\d,]+\.?\d*/);
           const skuMatch    = texto.match(/\b\d{4,10}\b/);
-
           productos.push({
-            nombre:      texto.split("\n")[0].trim().slice(0, 150),
-            precio:      precioMatch ? precioMatch[0] : null,
-            sku:         skuMatch ? skuMatch[0] : null,
+            nombre:         texto.split("\n")[0].trim().slice(0, 150),
+            precio:         precioMatch?.[0] || null,
+            sku:            skuMatch?.[0] || null,
             texto_completo: texto.slice(0, 400),
-            selector:    sel
+            selector:       sel
           });
         });
       } catch(e) {}
     });
-
     return productos.slice(0, 100);
   }
 
   function extraerFormularios() {
     const forms = [];
-
     document.querySelectorAll("form, [role='form']").forEach(form => {
       const campos = [];
       form.querySelectorAll("input, select, textarea, [contenteditable]").forEach(el => {
         if (el.type === "hidden") return;
         campos.push({
-          tag:          el.tagName.toLowerCase(),
-          tipo:         el.type || "",
-          nombre:       el.name || el.id || "",
-          label:        getLabel(el),
-          valor:        el.value || el.innerText || "",
-          placeholder:  el.placeholder || "",
-          requerido:    el.required || false,
-          aria_label:   el.getAttribute("aria-label") || ""
+          tag:         el.tagName.toLowerCase(),
+          tipo:        el.type || "",
+          nombre:      el.name || el.id || "",
+          label:       getLabel(el),
+          valor:       el.value || el.innerText || "",
+          placeholder: el.placeholder || "",
+          requerido:   el.required || false,
+          aria_label:  el.getAttribute("aria-label") || ""
         });
       });
-      if (campos.length) {
-        forms.push({ id: form.id || "", action: form.action || "", campos });
-      }
+      if (campos.length) forms.push({ id: form.id || "", action: form.action || "", campos });
     });
-
-    // Inputs sueltos fuera de forms
     if (!forms.length) {
       const campos = [];
       document.querySelectorAll("input:not([type=hidden]), select, textarea").forEach(el => {
@@ -246,12 +357,13 @@
           nombre:      el.name || el.id || "",
           label:       getLabel(el),
           valor:       el.value || "",
-          placeholder: el.placeholder || ""
+          placeholder: el.placeholder || "",
+          requerido:   el.required || false,
+          aria_label:  el.getAttribute("aria-label") || ""
         });
       });
       if (campos.length) forms.push({ id: "sueltos", action: "", campos });
     }
-
     return forms;
   }
 
@@ -267,14 +379,18 @@
 
   function extraerTextos() {
     return [...document.querySelectorAll("h1,h2,h3,h4,p,span[class*='price'],span[class*='precio'],span[class*='name'],div[class*='description']")]
-      .map(el => ({ tag: el.tagName, clase: el.className?.toString?.().slice(0, 60) || "", texto: el.innerText?.trim().slice(0, 200) || "" }))
+      .map(el => ({
+        tag:   el.tagName,
+        clase: el.className?.toString?.().slice(0, 60) || "",
+        texto: el.innerText?.trim().slice(0, 200) || ""
+      }))
       .filter(x => x.texto.length > 2)
       .slice(0, 100);
   }
 
   function extraerListas() {
     return [...document.querySelectorAll("ul, ol")].map(ul => ({
-      tipo: ul.tagName,
+      tipo:  ul.tagName,
       items: [...ul.querySelectorAll("li")].map(li => li.innerText?.trim().slice(0, 150)).filter(Boolean)
     })).filter(l => l.items.length > 0).slice(0, 20);
   }
@@ -299,16 +415,6 @@
       if (lbl) return lbl.innerText.trim();
     }
     return el.placeholder || el.getAttribute("aria-label") || el.name || el.id || "";
-  }
-
-  function log(msg) {
-    const el = document.getElementById("aos-log");
-    if (!el) return;
-    const row = document.createElement("div");
-    row.className = "aos-log-row";
-    row.innerHTML = `<span class="aos-time">${new Date().toLocaleTimeString()}</span> ${msg}`;
-    el.prepend(row);
-    while (el.children.length > 30) el.lastChild.remove();
   }
 
 })();
