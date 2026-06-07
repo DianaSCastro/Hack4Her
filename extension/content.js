@@ -16,13 +16,14 @@
   fab.title = "O-Trace Agente";
   fab.innerHTML = `
     <div class="ot-fab-ring"></div>
-    <div class="ot-fab-inner">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <circle cx="11" cy="11" r="8" stroke="white" stroke-width="1.8"/>
-        <path d="M21 21l-4.35-4.35" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M11 8v3l2 2" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
-      </svg>
-    </div>
+    <video
+      id="ot-fab-video"
+      src="${EXT}icons/Logoanimado.mp4"
+      autoplay
+      loop
+      muted
+      playsinline
+    ></video>
   `;
   document.body.appendChild(fab);
   fab.addEventListener("click", () => panel.classList.toggle("ot-open"));
@@ -44,7 +45,7 @@
           </svg>
         </div>
         <div>
-          <div class="ot-name">O-Trace</div>
+          <div class="ot-name">O-Trace AI</div>
           <div class="ot-sub"></div>
         </div>
       </div>

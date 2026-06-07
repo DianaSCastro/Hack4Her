@@ -9,34 +9,40 @@
   position: fixed;
   bottom: 28px; right: 28px;
   z-index: 2147483647;
-  width: 54px; height: 54px;
+  width: 64px; height: 64px;
   cursor: pointer;
   user-select: none;
+  border-radius: 50%;
+  overflow: visible;
 }
 
-.ot-fab-ring {
+#ot-fab .ot-fab-ring {
   position: absolute;
   inset: -5px;
   border-radius: 50%;
-  background: conic-gradient(from 0deg, #c8102e, #ff6b6b, #c8102e, transparent 70%);
-  animation: ot-spin 2.5s linear infinite;
-  opacity: 0.8;
+  background: conic-gradient(from 0deg, #c8102e, #ff6b6b, #c8102e, transparent 65%);
+  animation: ot-spin 3s linear infinite;
+  opacity: 0.85;
+  z-index: 0;
 }
 
-.ot-fab-inner {
+#ot-fab #ot-fab-video {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   border-radius: 50%;
-  background: linear-gradient(135deg, #c8102e 0%, #7f0a1e 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 20px rgba(200,16,46,.6);
-  animation: ot-pulse 2s ease-in-out infinite;
-  transition: transform .2s cubic-bezier(.34,1.56,.64,1);
+  display: block;
+  z-index: 1;
+  box-shadow: 0 4px 24px rgba(200,16,46,.55);
+  transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s;
 }
 
-#ot-fab:hover .ot-fab-inner { transform: scale(1.12); }
+#ot-fab:hover #ot-fab-video {
+  transform: scale(1.1);
+  box-shadow: 0 6px 32px rgba(200,16,46,.75);
+}
 
 @keyframes ot-spin  { to { transform: rotate(360deg); } }
 @keyframes ot-pulse {
