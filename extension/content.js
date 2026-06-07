@@ -45,7 +45,7 @@
         </div>
         <div>
           <div class="ot-name">O-Trace</div>
-          <div class="ot-sub">Agente de lectura web · IA</div>
+          <div class="ot-sub"></div>
         </div>
       </div>
       <button class="ot-close" id="ot-close">✕</button>
@@ -54,7 +54,7 @@
     <!-- STATUS -->
     <div class="ot-status" id="ot-status">
       <span class="ot-dot" id="ot-dot"></span>
-      <span id="ot-status-text">En espera</span>
+      <span id="ot-status-text">EN ESPERA</span>
     </div>
 
     <!-- URL CONTEXT -->
@@ -75,7 +75,7 @@
       <button class="ot-btn ot-btn-analizar" id="ot-analizar">
         <img id="ot-img-analizar" class="ot-btn-img" src="" alt=""/>
         <div class="ot-btn-text">
-          <span class="ot-btn-label">Analizar página</span>
+          <span class="ot-btn-label">ANALIZAR PÁGINA</span>
           <span class="ot-btn-desc">Extrae datos y mapea con catálogo</span>
         </div>
       </button>
@@ -83,16 +83,22 @@
       <button class="ot-btn ot-btn-auto" id="ot-auto">
         <img id="ot-img-auto" class="ot-btn-img" src="" alt=""/>
         <div class="ot-btn-text">
-          <span class="ot-btn-label">Automatizar análisis</span>
+          <span class="ot-btn-label">AUTOMATIZAR ANÁLISIS</span>
           <span class="ot-btn-desc">Modo autónomo — próximamente</span>
         </div>
       </button>
 
     </div>
 
-    <!-- DIVIDER -->
-    <div class="ot-divider">
-      <span>Actividad del agente</span>
+    <!-- LOG HEADER -->
+    <div class="ot-log-header">
+      <div class="ot-log-title-txt">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Actividad del agente
+      </div>
+      <button class="ot-clear-btn" id="ot-clear">LIMPIAR</button>
     </div>
 
     <!-- LOGS -->
@@ -111,9 +117,10 @@
   // ── Eventos ───────────────────────────────────────────────
 
   document.getElementById("ot-close").onclick    = () => panel.classList.remove("ot-open");
+  document.getElementById("ot-clear").onclick    = clearLogs;
   document.getElementById("ot-auto").onclick     = () => {
-    agentLog("🔒 Módulo de automatización autónoma en desarrollo", "warn");
-    agentLog("⏳ Esta funcionalidad estará disponible en la siguiente versión", "info");
+    agentLog("Módulo de automatización autónoma en desarrollo", "warn");
+    agentLog("Esta funcionalidad estará disponible en la siguiente versión", "info");
   };
   document.getElementById("ot-analizar").onclick = () => analizar();
 
@@ -131,24 +138,24 @@
   // ── Análisis ──────────────────────────────────────────────
 
   function analizar() {
-    setStatus("Inicializando", "thinking");
+    setStatus("INICIALIZANDO", "thinking");
     clearLogs();
 
-    agentLog("🧠 O-Trace inicializando análisis de contexto web...", "think");
-    agentLog("🔍 Escaneando estructura del DOM...", "info");
+    agentLog("O-Trace inicializando análisis de contexto web...", "think");
+    agentLog("Escaneando estructura del DOM...", "info");
 
     setTimeout(() => {
       const payload = extraerTodo();
 
-      agentLog(`📐 Arquitectura detectada: ${document.querySelectorAll("*").length} nodos`, "info");
-      agentLog(`🏷️  Productos identificados: ${payload.productos.length}`, "data");
-      agentLog(`📋 Formularios encontrados: ${payload.formularios.length}`, "data");
-      agentLog(`📊 Tablas estructuradas: ${payload.tablas.length}`, "data");
-      agentLog(`🔗 Hipervínculos mapeados: ${payload.links.length}`, "data");
+      agentLog(`Arquitectura detectada: ${document.querySelectorAll("*").length} nodos`, "info");
+      agentLog(`Productos identificados: ${payload.productos.length}`, "data");
+      agentLog(`Formularios encontrados: ${payload.formularios.length}`, "data");
+      agentLog(`Tablas estructuradas: ${payload.tablas.length}`, "data");
+      agentLog(`Hipervínculos mapeados: ${payload.links.length}`, "data");
 
-      setStatus("Procesando con IA", "processing");
-      agentLog("⚙️  Serializando payload para modelo semántico...", "think");
-      agentLog("🚀 Enviando contexto a backend Claude Sonnet...", "info");
+      setStatus("PROCESANDO CON AGENTE", "processing");
+      agentLog("Serializando payload para modelo semántico...", "think");
+      agentLog("Enviando contexto a backend Claude Sonnet...", "info");
 
       console.group("🔍 [O-Trace] Captura completa");
       console.log(JSON.stringify(payload, null, 2));
@@ -156,24 +163,24 @@
 
       chrome.runtime.sendMessage({ type: "FETCH_MAPEAR", payload }, (res) => {
         if (chrome.runtime.lastError) {
-          agentLog(`❌ Error de conexión: ${chrome.runtime.lastError.message}`, "error");
+          agentLog(`Error de conexión: ${chrome.runtime.lastError.message}`, "error");
           setStatus("Error", "error");
           return;
         }
         if (res?.ok) {
           const d = res.data;
-          agentLog("✅ Respuesta recibida del modelo", "success");
+          agentLog("Respuesta recibida del modelo", "success");
           if (d.productos_detectados?.length) {
-            agentLog(`📦 Productos mapeados: ${d.productos_detectados.length}`, "success");
+            agentLog(`Productos mapeados: ${d.productos_detectados.length}`, "success");
             d.productos_detectados.forEach(p => {
               agentLog(`   └ ${p.nombre_cliente} → SKU ${p.sku_interno}`, "data");
             });
           }
           if (d.resumen) agentLog(`💬 ${d.resumen}`, "think");
-          setStatus("Análisis completo", "done");
+          setStatus("ANÁLISIS COMPLETO", "done");
           console.log("🤖 [O-Trace] Claude:", d);
         } else {
-          agentLog(`❌ Backend: ${res?.error}`, "error");
+          agentLog(`Backend: ${res?.error}`, "error");
           setStatus("Error", "error");
         }
       });

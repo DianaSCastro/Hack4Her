@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 /* ============================================================
-   O-Trace — Overlay CSS
+   O-Trace — Overlay CSS v3
    ============================================================ */
 
 /* ── FAB ─────────────────────────────────────────────────── */
@@ -48,13 +50,13 @@
   top: 0; right: -370px;
   width: 350px; height: 100vh;
   background: #080c14;
-  border-left: 1px solid #151d2e;
+  border-left: 1px solid #1e2a40;
   z-index: 2147483646;
   display: flex;
   flex-direction: column;
-  font-family: 'Courier New', monospace;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   font-size: 12px;
-  color: #c9d1d9;
+  color: #ffffff;
   transition: right .32s cubic-bezier(.16,1,.3,1);
   overflow: hidden;
 }
@@ -86,8 +88,8 @@
 }
 
 .ot-name {
-  font-size: 16px;
-  font-weight: 900;
+  font-size: 18px;
+  font-weight: 800;
   color: #fff;
   letter-spacing: .06em;
   line-height: 1;
@@ -95,7 +97,7 @@
 
 .ot-sub {
   font-size: 9px;
-  color: rgba(255,255,255,.55);
+  color: rgba(255,255,255,.8);
   letter-spacing: .08em;
   margin-top: 2px;
 }
@@ -111,7 +113,7 @@
   display: flex; align-items: center; justify-content: center;
   transition: background .18s;
 }
-.ot-close:hover { background: rgba(255,255,255,.25); }
+.ot-close:hover { background: rgba(255,255,255,.3); }
 
 /* Status bar */
 .ot-status {
@@ -120,19 +122,19 @@
   gap: 8px;
   padding: 8px 16px;
   background: #0b1120;
-  border-bottom: 1px solid #151d2e;
-  font-size: 10px;
+  border-bottom: 1px solid #1e2a40;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .12em;
-  color: #4b5563;
+  color: #e2e8f0;
   flex-shrink: 0;
 }
 
 .ot-dot {
-  width: 7px; height: 7px;
+  width: 12px; height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: #374151;
+  background: #f7f8fa;
 }
 .ot-dot-thinking   { background: #f59e0b; animation: ot-blink .8s infinite; }
 .ot-dot-processing { background: #3b82f6; animation: ot-blink .5s infinite; }
@@ -145,7 +147,7 @@
 .ot-context {
   padding: 10px 16px;
   background: #0b1120;
-  border-bottom: 1px solid #151d2e;
+  border-bottom: 1px solid #1e2a40;
   flex-shrink: 0;
 }
 
@@ -153,23 +155,23 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .14em;
-  color: #374151;
+  color: #ffffff;
   text-transform: uppercase;
   margin-bottom: 4px;
 }
 
 .ot-context-url {
-  font-size: 10px;
-  color: #6b7280;
+  font-size: 12px;
+  color: #bfdbfe;
   word-break: break-all;
   line-height: 1.4;
   padding: 6px 8px;
   background: #080c14;
   border-radius: 5px;
-  border: 1px solid #151d2e;
+  border: 1px solid #1e2a40;
 }
 
 /* Botones */
@@ -187,91 +189,100 @@
   gap: 12px;
   padding: 12px 14px;
   border-radius: 10px;
-  border: 1px solid #151d2e;
+  border: 1px solid #1e2a40;
   background: #0e1523;
   cursor: pointer;
   transition: all .2s;
   text-align: left;
   width: 100%;
-  color: #c9d1d9;
-  font-family: 'Courier New', monospace;
+  color: #ffffff;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
 }
 
 .ot-btn-img {
-  width: 38px;
-  height: 38px;
+  width: 50px; height: 50px;
   object-fit: contain;
   flex-shrink: 0;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,.4));
-  transition: transform .2s, filter .2s;
+  transition: transform .2s;
 }
 
-.ot-btn-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
+.ot-btn-text { display: flex; flex-direction: column; gap: 2px; }
 
 .ot-btn-label {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: .03em;
+  color: #ffffff;
 }
 
 .ot-btn-desc {
-  font-size: 10px;
-  color: #4b5563;
-  font-style: normal;
+  font-size: 11px;
+  color: #94a3b8;
 }
 
-/* Analizar — activo */
-.ot-btn-analizar {
-  border-color: rgba(200,16,46,.3);
-}
+/* Analizar */
+.ot-btn-analizar { border-color: rgba(200,16,46,.35); }
 .ot-btn-analizar:hover {
   background: #1a0a10;
   border-color: #c8102e;
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(200,16,46,.25);
 }
-.ot-btn-analizar:hover .ot-btn-img { transform: scale(1.08); }
-.ot-btn-analizar:hover .ot-btn-label { color: #ff6b6b; }
+.ot-btn-analizar:hover .ot-btn-img  { transform: scale(1.08); }
+.ot-btn-analizar:hover .ot-btn-label { color: #ff8a9a; }
 
-/* Auto — deshabilitado visualmente */
-.ot-btn-auto {
-  opacity: .5;
-  cursor: not-allowed;
-}
+/* Auto */
+.ot-btn-auto {border-color: rgba(200,16,46,.35); }
 .ot-btn-auto:hover {
-  opacity: .6;
-  border-color: #1e2a40;
-  transform: none;
+   background: #1a0a10;
+  border-color: #c8102e;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(200,16,46,.25);
 }
+.ot-btn-auto:hover .ot-btn-label { color: #e2e8f0; }
+.ot-btn-auto:hover .ot-btn-img   { transform: scale(1.08); }
 
-/* Divider */
-.ot-divider {
+/* Divider + limpiar */
+.ot-log-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 14px 16px 6px;
+  justify-content: space-between;
+  padding: 12px 16px 6px;
   flex-shrink: 0;
 }
-.ot-divider span {
-  font-size: 9px;
+
+.ot-log-title-txt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .14em;
-  color: #1e2a40;
+  color: #ffffff;
   text-transform: uppercase;
-  white-space: nowrap;
-}
-.ot-divider::before, .ot-divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: #151d2e;
 }
 
-/* Logs */
+.ot-clear-btn {
+  font-size: 12px;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: #ffffff;
+  background: none;
+  border: 1px solid #ffffff;
+  border-radius: 4px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all .18s;
+}
+.ot-clear-btn:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+  background: rgba(239,68,68,.06);
+}
+
+/* Logs con scroll */
 .ot-logs {
   flex: 1;
   overflow-y: auto;
@@ -279,11 +290,12 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
+  min-height: 0;
 }
 
 .ot-log-empty {
-  font-size: 10px;
-  color: #1e2a40;
+  font-size: 12px;
+  color: #dbdfe5;
   text-align: center;
   padding: 24px 0;
   font-style: italic;
@@ -295,27 +307,30 @@
   gap: 8px;
   padding: 5px 8px;
   border-radius: 5px;
-  font-size: 10px;
-  line-height: 1.5;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.6;
   border-left: 2px solid transparent;
 }
 
 .ot-log-time {
-  color: #1e2a40;
+  color: #fdfeff;
   flex-shrink: 0;
   font-size: 9px;
   padding-top: 1px;
+  white-space: nowrap;
 }
 
-.ot-log-msg { word-break: break-word; }
+.ot-log-msg { word-break: break-word; font-family: 'Inter', system-ui, sans-serif; }
 
-.ot-log-think   { background: rgba(245,158,11,.06); border-color: #f59e0b; color: #d97706; }
-.ot-log-info    { background: rgba(59,130,246,.06);  border-color: #3b82f6; color: #93c5fd; }
-.ot-log-data    { background: rgba(139,92,246,.06);  border-color: #8b5cf6; color: #c4b5fd; }
-.ot-log-success { background: rgba(16,185,129,.06);  border-color: #10b981; color: #6ee7b7; }
-.ot-log-warn    { background: rgba(245,158,11,.06);  border-color: #f59e0b; color: #fcd34d; }
-.ot-log-error   { background: rgba(239,68,68,.06);   border-color: #ef4444; color: #fca5a5; }
+.ot-log-think   { background: rgba(245,158,11,.07);  border-color: #f59e0b; color: #fde68a; }
+.ot-log-info    { background: rgba(59,130,246,.07);  border-color: #3b82f6; color: #bfdbfe; }
+.ot-log-data    { background: rgba(139,92,246,.07);  border-color: #8b5cf6; color: #ddd6fe; }
+.ot-log-success { background: rgba(16,185,129,.07);  border-color: #10b981; color: #a7f3d0; }
+.ot-log-warn    { background: rgba(245,158,11,.07);  border-color: #f59e0b; color: #fde68a; }
+.ot-log-error   { background: rgba(239,68,68,.07);   border-color: #ef4444; color: #fecaca; }
 
 /* Scrollbar */
-.ot-logs::-webkit-scrollbar { width: 3px; }
-.ot-logs::-webkit-scrollbar-thumb { background: #151d2e; border-radius: 2px; }
+.ot-logs::-webkit-scrollbar { width: 6px; }
+.ot-logs::-webkit-scrollbar-track { background: transparent; }
+.ot-logs::-webkit-scrollbar-thumb { background: #f3f3f4; border-radius: 2px; }
