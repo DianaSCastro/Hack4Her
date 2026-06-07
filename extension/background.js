@@ -59,6 +59,8 @@ async function fetchMapear(payload, sendResponse) {
 
 // ── Automatizar ──────────────────────────────────────────────
 async function runAutomation(sendResponse) {
+  // /automatizar ahora retorna inmediatamente (Playwright corre en hilo background)
+  // El content.js hace polling a /progreso para recibir los logs en tiempo real
   try {
     state.mode = "automating";
     broadcast({ type: "STATE_UPDATE", state });
@@ -72,7 +74,8 @@ async function runAutomation(sendResponse) {
 
     state.mode = "idle";
     broadcast({ type: "STATE_UPDATE", state });
-    sendResponse({ ok: true, result: data });
+    // ok:true indica que se inició correctamente; los resultados llegan via /progreso
+    sendResponse({ ok: data.ok !== false, error: data.error });
   } catch (err) {
     state.mode = "idle";
     broadcast({ type: "STATE_UPDATE", state });

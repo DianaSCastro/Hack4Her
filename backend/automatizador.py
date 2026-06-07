@@ -24,12 +24,17 @@ load_dotenv()
 DESTINATION_URL = os.getenv("DESTINATION_URL", "https://arca-continental-hack4-her.vercel.app/")
 
 
-async def llenar_formulario(datos: list[dict]) -> dict:
+async def llenar_formulario(datos: list[dict], log_callback=None) -> dict:
     """
     Recibe lista de productos ya mapeados con datos del catálogo.
     Llena el formulario destino por cada producto y valida.
     """
     resultados_validacion = []
+
+    def log(msg, tipo="info", done=False):
+        print(f"  [Automatizador] {msg}")
+        if log_callback:
+            log_callback(msg, tipo, done)
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=False, slow_mo=80)
@@ -46,7 +51,7 @@ async def llenar_formulario(datos: list[dict]) -> dict:
                 bu = item.get("id_businessunit", "")
                 if bu:
                     await page.select_option("#id_businessunit", value=str(bu), timeout=5000)
-                    print(f"  BU seleccionada: {bu}")
+                    log(f"BU seleccionada: {bu}", "data")
 
                 # ── SKU Solicitado ────────────────────────────────────────
                 # Usar fill + dispatch 'input' para que el JS calcule el hash automáticamente
@@ -79,7 +84,17 @@ async def llenar_formulario(datos: list[dict]) -> dict:
                 # ── Validación binaria ────────────────────────────────────
                 validacion = await _validar(page, item)
                 resultados_validacion.append(validacion)
-                print(f"  {'✅' if validacion['coincide'] else '❌'} Validación: {validacion}")
+                icon = "✅" if validacion["coincide"] else "❌"
+                if validacion.get("error"):
+                    log(f"Registro {idx+1} {icon} ERROR — {validacion['producto']}", "error")
+                    log(f"   └ {validacion['error']}", "error")
+                elif validacion["coincide"]:
+                    log(f"Registro {idx+1} {icon} OK — {validacion['producto']}", "success")
+                    log(f"   └ SKU: {validacion['encontrado_sku']} | Nombre: {validacion['encontrado_nombre']}", "data")
+                else:
+                    log(f"Registro {idx+1} {icon} NO COINCIDE — {validacion['producto']}", "error")
+                    log(f"   └ SKU esperado: {validacion['esperado_sku']} → encontrado: {validacion['encontrado_sku']}", "warn")
+                    log(f"   └ Nombre esperado: {validacion['esperado_nombre']} → encontrado: {validacion['encontrado_nombre']}", "warn")
 
                 # ── CAPTURAR REGISTRO o dejar abierto ─────────────────────
                 if not es_ultimo:
@@ -87,15 +102,15 @@ async def llenar_formulario(datos: list[dict]) -> dict:
                     await page.click("button[type='submit']", timeout=5000)
                     # El JS de la página resetea el form y genera nuevo id_linea/id_pedido
                     await asyncio.sleep(0.8)
-                    print(f"  ✅ CAPTURAR REGISTRO presionado — formulario reiniciado para siguiente registro")
+                    log("CAPTURAR REGISTRO presionado — siguiente registro", "info")
                 else:
-                    print(f"  🏁 Último registro llenado — ventana queda abierta para revisión")
+                    log("Último registro llenado — ventana queda abierta", "info")
                     await page.click("button[type='submit']", timeout=5000)
                     await asyncio.sleep(120)
 
 
             except Exception as e:
-                print(f"  [Error] {e}")
+                log(f"Error: {e}", "error")
                 resultados_validacion.append({
                     "producto": item.get("nombre_sku_solicitado"),
                     "coincide": False,
@@ -146,6 +161,6 @@ async def _validar(page, item_original: dict) -> dict:
         }
 
 
-def run(datos: list[dict]) -> dict:
+def run(datos: list[dict], log_callback=None) -> dict:
     """Punto de entrada síncrono para llamar desde Flask."""
-    return asyncio.run(llenar_formulario(datos))
+    return asyncio.run(llenar_formulario(datos, log_callback=log_callback))
