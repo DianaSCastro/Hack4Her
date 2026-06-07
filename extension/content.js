@@ -193,10 +193,8 @@
   // ── LLENAR FORMULARIO (via Playwright + backend) ──────────
 
   function llenarFormulario() {
-    analizar(); // Primero analizamos para asegurar que tenemos datos frescos
     setStatus("VERIFICANDO DATOS", "thinking");
 
-    // Verificar que haya productos capturados en el background
     chrome.runtime.sendMessage({ type: "GET_STATE" }, (res) => {
       if (chrome.runtime.lastError) {
         agentLog(`Error de conexión: ${chrome.runtime.lastError.message}`, "error");
@@ -205,7 +203,6 @@
       }
 
       const productos = res?.state?.productos || [];
-
       if (!productos.length) {
         agentLog("No hay productos capturados. Usa 'Analizar Página' primero.", "warn");
         setStatus("EN ESPERA", "thinking");
@@ -216,30 +213,67 @@
       agentLog("Iniciando Playwright en el sistema destino...", "info");
       setStatus("AUTOMATIZANDO", "processing");
 
+      // 1. Disparar automatización (backend responde de inmediato)
       chrome.runtime.sendMessage({ type: "RUN_AUTOMATION" }, (resp) => {
-        if (chrome.runtime.lastError) {
-          agentLog(`Error de conexión: ${chrome.runtime.lastError.message}`, "error");
+        if (chrome.runtime.lastError || !resp?.ok) {
+          agentLog(`Error al iniciar: ${chrome.runtime.lastError?.message || resp?.error}`, "error");
           setStatus("ERROR", "error");
           return;
         }
-        if (resp?.ok) {
-          const r = resp.result;
-          agentLog(`Formulario llenado: ${r.exitosos}/${r.total} registros exitosos`, "success");
-          if (r.fallidos > 0) {
-            agentLog(`${r.fallidos} fallo(s) detectados — ver consola para detalles`, "warn");
-            r.detalle.filter(d => !d.coincide).forEach(d => {
-              agentLog(`   └ ❌ ${d.producto}: ${d.error || "no coincide"}`, "error");
-            });
-            console.warn("[O-Trace] Detalle de fallos:", r.detalle.filter(d => !d.coincide));
-          }
-          setStatus("AUTOMATIZACIÓN COMPLETA", "done");
-          console.log("[O-Trace] Resultado automatizador:", r);
-        } else {
-          agentLog(`Error al automatizar: ${resp?.error}`, "error");
-          setStatus("ERROR", "error");
-        }
+        // 2. Polling a /progreso para mostrar logs en tiempo real
+        _iniciarPolling();
       });
     });
+  }
+
+  function _iniciarPolling() {
+    const BACKEND = "http://localhost:5000";
+    let offset = 0;
+    let activo = true;
+    let intentos = 0;
+    const MAX_INTENTOS = 300; // 5 min máx
+
+    const intervalo = setInterval(async () => {
+      // Guardia: si ya se detuvo no hacer nada más
+      if (!activo) {
+        clearInterval(intervalo);
+        return;
+      }
+
+      intentos++;
+      if (intentos > MAX_INTENTOS) {
+        activo = false;
+        clearInterval(intervalo);
+        agentLog("Tiempo máximo de espera alcanzado", "warn");
+        setStatus("TIEMPO AGOTADO", "error");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${BACKEND}/progreso?offset=${offset}`);
+        const data = await res.json();
+
+        // Mostrar logs nuevos en el panel
+        (data.logs || []).forEach(entry => {
+          agentLog(entry.msg, entry.type || "info");
+          // Detener en cuanto se llene el último registro
+          if (entry.msg.includes("Último registro llenado")) {
+            activo = false;
+          }
+        });
+        offset = data.offset;
+
+        // Detener en cuanto llegue done — sin esperar siguiente tick
+        if (data.done) {
+          activo = false;
+          clearInterval(intervalo);
+          setStatus("AUTOMATIZACIÓN COMPLETA", "done");
+          console.log("[O-Trace] Resultado final:", data.resultado);
+        }
+      } catch (e) {
+        // Ignorar errores de red transitorios
+      }
+    }, 1000);
   }
 
   // ── Helpers de UI ─────────────────────────────────────────
