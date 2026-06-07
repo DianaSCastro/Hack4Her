@@ -39,6 +39,9 @@
       <button class="aos-btn aos-capture" id="aos-capture">
         <span>📋</span> Capturar página → Consola + Backend
       </button>
+      <button class="aos-btn aos-fill" id="aos-fill">
+        <span>📋</span> Llenar formulario
+      </button>
       <button class="aos-btn aos-reset" id="aos-reset">
         <span>🔄</span> Limpiar log
       </button>
@@ -55,11 +58,49 @@
 
   document.getElementById("aos-close").onclick  = () => panel.classList.remove("aos-open");
   document.getElementById("aos-capture").onclick = capturarYEnviar;
+  document.getElementById("aos-fill").onclick = llenarFormulario;
   document.getElementById("aos-reset").onclick   = () => {
     document.getElementById("aos-log").innerHTML = "";
   };
 
   // ── NÚCLEO ────────────────────────────────────────────────
+
+  function llenarFormulario() {
+    // Primero verificar que haya productos capturados en el background
+    chrome.runtime.sendMessage({ type: "GET_STATE" }, (res) => {
+      if (chrome.runtime.lastError) {
+        log(`❌ ${chrome.runtime.lastError.message}`);
+        return;
+      }
+
+      const productos = res?.state?.productos || [];
+
+      if (!productos.length) {
+        log("⚠️ No hay productos capturados. Usa 'Capturar página' primero.");
+        return;
+      }
+
+      log(`🤖 Enviando ${productos.length} producto(s) al automatizador...`);
+
+      chrome.runtime.sendMessage({ type: "RUN_AUTOMATION" }, (resp) => {
+        if (chrome.runtime.lastError) {
+          log(`❌ ${chrome.runtime.lastError.message}`);
+          return;
+        }
+        if (resp?.ok) {
+          const r = resp.result;
+          log(`✅ Formulario llenado: ${r.exitosos}/${r.total} exitosos`);
+          if (r.fallidos > 0) {
+            log(`⚠️ ${r.fallidos} fallo(s) — ver consola para detalles`);
+            console.warn("[AoS] Detalle de fallos:", r.detalle.filter(d => !d.coincide));
+          }
+          console.log("[AoS] Resultado automatizador:", r);
+        } else {
+          log(`❌ Error al automatizar: ${resp?.error}`);
+        }
+      });
+    });
+  };
 
   function capturarYEnviar() {
     log("⏳ Extrayendo DOM completo...");
